@@ -5,11 +5,17 @@
  */
 package gamesoflife;
 
+import java.awt.Graphics;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
+
+
 /**
  *
  * @author Ben
  */
-public class GamesOfLife 
+public class GamesOfLife implements Runnable
 {    
     /**
      * "conway"
@@ -21,17 +27,15 @@ public class GamesOfLife
      * "custom"
      */
     public static String rules;
-    
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) 
-    {
-        rules = "conway";
-        int gridWidth = 20;
-        int gridHeight = 20;
+    private static int gridWidth = 160;
+    private static int gridHeight = 90;
         
-        Cell[][] cells = new Cell[gridWidth][gridHeight];
+    private static Cell[][] cells = new Cell[gridWidth][gridHeight];
+
+    public GamesOfLife()
+    {
+        rules = "custom-conway";
+        
         
         for(int i = 0; i < gridWidth; ++i)
         {
@@ -41,9 +45,9 @@ public class GamesOfLife
             }
         }
         
-        for(int i = 1; i < gridHeight-1; ++i)
+        for(int i = 1; i < gridWidth-1; ++i)
         {
-            for (int j = 1; j < gridWidth-1; j++) 
+            for (int j = 1; j < gridHeight-1; j++) 
             {
                 cells[i][j].setNorth(cells[i][j-1]);
                 cells[i][j].setNortheast(cells[i+1][j-1]);
@@ -56,47 +60,65 @@ public class GamesOfLife
             }
         }
         
-        cells[4][4].setStatus(Cell.ALIVE);
-        cells[4][5].setStatus(Cell.ALIVE);
-        cells[5][4].setStatus(Cell.ALIVE);
-        cells[7][7].setStatus(Cell.ALIVE);
-        cells[7][6].setStatus(Cell.ALIVE);
-        cells[6][7].setStatus(Cell.ALIVE);
-        
-        for(int i = 0; i < 10; ++i)
-        {
-            for (int j = 0; j < gridWidth; j++) 
-            {
-                for (int k = 0; k < gridHeight; k++) 
-                {
-                    if(cells[k][j].getStatus() == Cell.DEAD)
-                        System.out.print("- ");
-                    if(cells[k][j].getStatus() == Cell.ALIVE)
-                        System.out.print("X ");
-                }
-                System.out.println();
-            }
-            
-            System.out.println();
-            
-            for (int j = 0; j < gridWidth; j++) 
-            {
-                for (int k = 0; k < gridHeight; k++) 
-                {
-                    cells[j][k].cycle();
-                }
-            }
-            
-            for (int j = 0; j < gridHeight; j++) 
-            {
-                for (int k = 0; k < gridWidth; k++) 
-                {
-                    cells[j][k].updateStatus();
-                }
-            }
-            
-            
-        }
     }
-    
+
+    @Override
+    public void run() 
+    {
+        while(true)
+        {
+            System.out.println("Running Backend");
+            
+            if(!Application.paused)
+            {
+    //            for (int j = 0; j < gridWidth; j++) 
+    //            {
+    //                for (int k = 0; k < gridHeight; k++) 
+    //                {
+    //                    if(cells[k][j].getStatus() == Cell.DEAD)
+    //                        System.out.print("- ");
+    //                    if(cells[k][j].getStatus() == Cell.ALIVE)
+    //                        System.out.print("X ");
+    //                }
+    //                System.out.println();
+    //            }
+
+                System.out.println();
+
+                for (int j = 0; j < gridWidth; j++) 
+                {
+                    for (int k = 0; k < gridHeight; k++) 
+                    {
+                        cells[j][k].cycle(rules);
+                    }
+                }
+
+                for (int j = 0; j < gridWidth; j++) 
+                {
+                    for (int k = 0; k < gridHeight; k++) 
+                    {
+                        cells[j][k].updateStatus();
+                    }
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(GamesOfLife.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        
+    }
+
+    public static int getGridHeight() {
+        return gridHeight;
+    }
+
+    public static int getGridWidth() {
+        return gridWidth;
+    }
+
+    public static Cell[][] getCells() {
+        return cells;
+    }
 }

@@ -6,6 +6,7 @@
 package gamesoflife;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import sun.net.www.content.audio.x_aiff;
 
 /**
@@ -19,8 +20,6 @@ public class Cell
     public static final char CONDUCTOR = 2;
     public static final char ELECTRON_HEAD = 3;
     public static final char ELECTRON_TAIL = 4;
-    
-    protected Color color;
     
     /**
      * 0 - Dead
@@ -59,22 +58,44 @@ public class Cell
         this.y = y;
     }
     
-    public void cycle()
+    public void paint(Graphics g, int xl, int yl, int w, int h)
     {
-        if(GamesOfLife.rules.equals("conway"))
+        g.setColor(deterimineColor());
+        g.fillRect(xl, yl, w, h);
+        g.setColor(Color.BLACK);
+    }
+    
+    public void cycle(String rules)
+    {
+        if(rules.equals("conway"))
             conway();
-        if(GamesOfLife.rules.equals("viral"))
+        if(rules.equals("viral"))
             viral();
-        if(GamesOfLife.rules.equals("wireworld"))
+        if(rules.equals("wireworld"))
             wireworld();
-        if(GamesOfLife.rules.equals("custom-conway"))
+        if(rules.equals("custom-conway"))
             customConway();
-        if(GamesOfLife.rules.equals("custom-viral"))
+        if(rules.equals("custom-viral"))
             customViral();
-        if(GamesOfLife.rules.equals("custom-wireworld"))
+        if(rules.equals("custom-wireworld"))
             customWireworld();
-        if(GamesOfLife.rules.equals("custom"))
+        if(rules.equals("custom"))
             custom();
+    }
+    
+    private Color deterimineColor()
+    {
+        if(status == DEAD)
+            return Color.LIGHT_GRAY;
+        if(status == ALIVE)
+            return Color.BLACK;
+        if(status == CONDUCTOR)
+            return Color.ORANGE;
+        if(status == ELECTRON_HEAD)
+            return Color.BLUE;
+        if(status == ELECTRON_TAIL)
+            return Color.GREEN;
+        return Color.LIGHT_GRAY;
     }
     
     public void conway() throws IllegalArgumentException
@@ -115,14 +136,38 @@ public class Cell
             if(countNeighborStatus(ELECTRON_HEAD) == 1
                     || countNeighborStatus(ELECTRON_HEAD) == 2)
                 tempStatus = ELECTRON_HEAD;
+            else
+                tempStatus = CONDUCTOR;
         }
         else if(this.status == ELECTRON_TAIL)
             tempStatus = CONDUCTOR;
+        else if(this.status == DEAD)
+            tempStatus = DEAD;
+            
     }
     
     public void customConway()
     {
-        
+        if(this.status == ALIVE)
+        {
+            if(countNeighborStatus(ALIVE) < 1)
+                tempStatus = DEAD;
+            else if(countNeighborStatus(ALIVE) == 2 
+                    || countNeighborStatus(ALIVE) == 3)
+                tempStatus = ALIVE;
+            else if(countNeighborStatus(ALIVE) > 3)
+                tempStatus = DEAD;
+        }
+        else if(this.status == DEAD)
+        {
+            if(countNeighborStatus(ALIVE) == 3)
+                tempStatus = ALIVE;
+        }
+        else
+        {
+            throw new IllegalArgumentException(
+                    "Conway's Rules Allow Only 2 Types, DEAD or ALIVE");
+        }
     }
     
     public void customViral()
@@ -171,16 +216,8 @@ public class Cell
         return y;
     }
 
-    public Color getColor() {
-        return color;
-    }
-
     public void setStatus(char status) {
         this.status = status;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
     }
 
     public void setNorth(Cell north) {
