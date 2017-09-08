@@ -86,7 +86,7 @@ public class Cell
     private Color deterimineColor()
     {
         if(status == DEAD)
-            return Color.LIGHT_GRAY;
+            return Application.gridBackgroundColor;
         if(status == ALIVE)
             return Color.BLACK;
         if(status == CONDUCTOR)
@@ -250,5 +250,11 @@ public class Cell
 
     public void setNorthwest(Cell northwest) {
         this.northwest = northwest;
+    }
+    
+    public void flushTempStatus()
+    {
+        status = DEAD;
+        tempStatus = DEAD;
     }
 }

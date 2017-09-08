@@ -15,13 +15,16 @@ public class Main {
      * @param args the command line arguments
      */
     
+    static GamesOfLife gol;
+    static Application app;
+    
     static Thread frontend;
     static Thread backend;
     
     public static void main(String[] args) 
     {
-        GamesOfLife gol = new GamesOfLife();
-        Application app = new Application();
+        gol = new GamesOfLife();
+        app = new Application();
         
         frontend = new Thread(app);
         backend = new Thread(gol);
@@ -31,6 +34,13 @@ public class Main {
         
         frontend.start();
         backend.start();
+    }
+    
+    public static void halt(String cause)
+    {
+        System.out.println("Program halted for reason: " + cause);
+        app.halt(cause);
+        gol.halt(cause);
     }
     
 }
