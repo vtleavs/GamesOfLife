@@ -22,49 +22,52 @@ import javax.swing.JFrame;
  */
 public class GOLRadioButton extends GOLButton
 {    
-    public GOLRadioButton(String title) 
+    public GOLRadioButton(String title, GOLController controller) 
     {
-        super(title);
+        super(title, controller);
     }
     
-    public GOLRadioButton(String title, String name) 
+    public GOLRadioButton(String title, String name, GOLController controller) 
     {
-        super(title, name);
+        super(title, name, controller);
     }
     
-    public GOLRadioButton(int x, int y, String title) 
+    public GOLRadioButton(int x, int y, String title, GOLController controller) 
     {
-        super(x, y, title);
+        super(x, y, title, controller);
     }
     
-    public GOLRadioButton(int x, int y, String title, String name) 
+    public GOLRadioButton(int x, int y, String title, String name, GOLController controller) 
     {
         
-        super(x, y, title, name);
+        super(x, y, title, name, controller);
     }
     
-    public GOLRadioButton(int x, int y, int width, int height, String title) 
+    public GOLRadioButton(int x, int y, int width, int height, String title, GOLController controller) 
     {
         
-        super(x, y, width, height, title);
+        super(x, y, width, height, title, controller);
     }
     
-    public GOLRadioButton(int x, int y, int width, int height, String title, String name) 
+    public GOLRadioButton(int x, int y, int width, int height, String title, String name, GOLController controller) 
     {
-        super(x, y, width, height, title, name);
+        super(x, y, width, height, title, name, controller);
     }
 
     @Override
     public void paint(Graphics g) {
+        if(!visible)
+            return;
+        
         if(toggled)
             g.setColor(new Color(Math.max(color.getRed()-50, 0), 
                     Math.max(color.getGreen()-50, 0), 
                     Math.max(color.getBlue()-50, 0)));
-        else if(disabled)
-            g.setColor(new Color(Math.max(color.getRed()-100, 0), 
-                    Math.max(color.getGreen()-100, 0), 
-                    Math.max(color.getBlue()-100, 0)));
-        else
+        if(disabled)
+            g.setColor(new Color(Math.max(color.getRed()-60, 0), 
+                    Math.max(color.getGreen()-60, 0), 
+                    Math.max(color.getBlue()-60, 0)));
+        if(!toggled && !disabled)
             g.setColor(color);
         
         g.fillRect(xLocation, yLocation, width, height);

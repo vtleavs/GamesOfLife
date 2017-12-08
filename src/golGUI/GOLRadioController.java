@@ -23,8 +23,10 @@ public class GOLRadioController extends GOLElement
     private Point upperLeftCorner;
     private Point lowerRightCorner;
 
-    public GOLRadioController() 
+    public GOLRadioController(GOLController controller) 
     {
+        super(-99, -99, -99, -99, controller);
+        
         radioButtons = new ArrayList<>();
     }
     
@@ -61,7 +63,7 @@ public class GOLRadioController extends GOLElement
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void paint(Graphics g) {        
         for(GOLRadioButton b : radioButtons)
         {
             b.paint(g);

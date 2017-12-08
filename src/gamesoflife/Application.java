@@ -5,18 +5,16 @@
  */
 package gamesoflife;
 
+import golGUI.GOLApp;
 import golGUI.GOLButton;
-import golGUI.GOLController;
 import golGUI.GOLRadioButton;
 import golGUI.GOLRadioController;
-import java.awt.AWTException;
+import golGUI.GOLSlider;
+import golGUI.GOLTextInput;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Robot;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -28,14 +26,13 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
 //import javax.swing.*;
 
 /**
  *
  * @author Ben
  */
-public class Application extends JFrame implements Runnable, ComponentListener, MouseListener, MouseMotionListener, KeyListener, ActionListener
+public class Application extends GOLApp implements Runnable, ComponentListener, MouseListener, MouseMotionListener, KeyListener, ActionListener
 {
     private Image dbImage;
     private Graphics dbGraphics;
@@ -62,30 +59,33 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
     GOLButton stepButton;
     GOLRadioButton gridButton;
     
-    GOLRadioController speedSelectorController = new GOLRadioController();
+    GOLRadioController speedSelectorController;
     GOLRadioButton[] speedSelectors = new GOLRadioButton[10];
-    GOLRadioController ruleSelectorController = new GOLRadioController();
+    GOLRadioController ruleSelectorController;
     GOLRadioButton[] ruleSelectors = new GOLRadioButton[7];
     
-    double scaleFactorX;
-    double scaleFactorY;
+    GOLSlider speedSlider;
     
-    GOLController controller;
+    GOLTextInput speedMax;
+    GOLTextInput speedMin;
+    GOLTextInput speedStep;
+    
+    QuitWindow quitWindow = null;
     
     public static Color backgroundColor;
     public static Color gridColor;
     public static Color gridBackgroundColor;
-    
-    private boolean straightMode = false;
         
     public static boolean paused = true;
     
     public Application()
     {
+        super();
+        
         System.out.print("Initializing Frontend: ");
         long initStart = System.currentTimeMillis();
         
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        buildUI();
         
         setSize(3200, 1800);
         //setSize(screenSize.width, screenSize.height);
@@ -95,34 +95,19 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
         dbImage = createImage(3200, 1800);
         dbGraphics = dbImage.getGraphics();
         
-        scaleFactorX = 1;//this.getSize().getWidth()/3200;
-        scaleFactorY = 1;//this.getSize().getHeight()/1800;
+        graphicScaleX = 1;//this.getSize().getWidth()/3200;
+        graphicScaleY = 1;//this.getSize().getHeight()/1800;
         
         cellW = (double)dbImage.getWidth(this)/(double)GamesOfLife.getGridWidth();
         cellH = (double)dbImage.getHeight(this)/(double)GamesOfLife.getGridHeight();
-        
-        addMouseListener(this);
-        addKeyListener(this);
-        addMouseMotionListener(this);
-        
+                
         halted = false;
-        
-        repaint();
-        
-        controller = new GOLController(this, scaleFactorX, scaleFactorY);
-        
-        Thread controllerThread = new Thread(controller);
-        controllerThread.start();
-        
-        controllerThread.setPriority(Thread.MAX_PRIORITY);
-        
-        buildUI();
         
         System.out.println(System.currentTimeMillis() - initStart + "ms");
         
-        conwayMode();
+        conwayMode();     
         
-         
+        repaint();
     }
     
     private void conwayMode()
@@ -143,6 +128,19 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
         while(!halted)
         {
             //System.out.println("Running Frontend");
+            
+            //if(quitWindow != null)
+                
+            
+            if(quitWindow != null && quitWindow.isActive())
+            {
+                controller.disable();
+            }
+            else if(quitWindow == null || !quitWindow.isActive())
+            {
+                controller.enable();
+            }
+            
             repaint();
             try {
                 Thread.sleep(1);
@@ -153,34 +151,63 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
         
     }
     
-    private void buildUI()
+    public void halt(String cause)
     {
-        resetButton = new GOLButton(100, 1650, 200, 100, "Reset");
+        System.out.println("Frontend halted for reason: " + cause);
+        halted = true;
+        
+        if(quitWindow != null)
+            quitWindow.halt(cause);
+        
+        controller.halt();
+        
+        this.dispose();
+    }
+    
+    @Override
+    protected void buildUI()
+    {
+        super.buildUI();        
+        resetButton = new GOLButton(100, 1650, 200, 100, "Reset", controller);
         resetButton.setColor(new Color(100, 100, 255));
-        runButton = new GOLButton(500, 1650, 300, 100, "Run / Pause");
+        runButton = new GOLButton(500, 1650, 300, 100, "Run / Pause", controller);
         runButton.setColor(Color.green);
-        stepButton = new GOLButton(900, 1650, 100, 100, "Step");
+        stepButton = new GOLButton(900, 1650, 100, 100, "Step", controller);
         stepButton.setColor(Color.lightGray);
-        gridButton = new GOLRadioButton(1100, 1650, 200, 100, "Toggle Grid");
+        gridButton = new GOLRadioButton(1100, 1650, 200, 100, "Toggle Grid", controller);
         gridButton.toggleOn();
-        quitButton = new GOLButton(3000, 1650, 100, 100, "Quit");
+        quitButton = new GOLButton(3000, 1650, 100, 100, "Quit", controller);
         quitButton.setColor(new Color(225, 100, 100));
+        
+        speedSlider = new GOLSlider(1575, 1675, 700, 50, 50, 1000, (float) 50, controller);
+        speedSlider.setValue(100);
+        speedSlider.setLabelPrefix("Step: ");
+        speedSlider.setLabelSuffex("ms");
+        
+        speedMin = new GOLTextInput(1425, 1675, 100, 50, controller);
+        speedMin.setValue("" + speedSlider.getMinValue());
+        speedMin.setFont(new Font("", Font.BOLD, 30));
+        
+        speedMax = new GOLTextInput(2325, 1675, 100, 50, controller);
+        speedMax.setValue("" + speedSlider.getMaxValue());
+        speedMax.setFont(new Font("", Font.BOLD, 30));
         
         int ssX = 1400;
         int ssY = 1675;
         int ssGap = 20;
         int ssWidth = 125;
         int ssHeight = 50;
-        speedSelectors[0] =  new GOLRadioButton(ssX, ssY, ssWidth, ssHeight, "25ms");
-        speedSelectors[1] =  new GOLRadioButton(ssX+ssGap+ssWidth, ssY, ssWidth, ssHeight, "50ms");
-        speedSelectors[2] =  new GOLRadioButton(ssX+2*ssGap+2*ssWidth, ssY, ssWidth, ssHeight, "75ms");
-        speedSelectors[3] =  new GOLRadioButton(ssX+3*ssGap+3*ssWidth, ssY, ssWidth, ssHeight, "100ms");
-        speedSelectors[4] =  new GOLRadioButton(ssX+4*ssGap+4*ssWidth, ssY, ssWidth, ssHeight, "200ms");
-        speedSelectors[5] =  new GOLRadioButton(ssX+5*ssGap+5*ssWidth, ssY, ssWidth, ssHeight, "300ms");
-        speedSelectors[6] =  new GOLRadioButton(ssX+6*ssGap+6*ssWidth, ssY, ssWidth, ssHeight, "400ms");
-        speedSelectors[7] =  new GOLRadioButton(ssX+7*ssGap+7*ssWidth, ssY, ssWidth, ssHeight, "500ms");
-        speedSelectors[8] =  new GOLRadioButton(ssX+8*ssGap+8*ssWidth, ssY, ssWidth, ssHeight, "1000ms");
-        speedSelectors[9] =  new GOLRadioButton(ssX+9*ssGap+9*ssWidth, ssY, ssWidth, ssHeight, "2000ms");
+        speedSelectorController = new GOLRadioController(controller);
+        speedSelectors[0] =  new GOLRadioButton(ssX, ssY, ssWidth, ssHeight, "25ms", controller);
+        speedSelectors[1] =  new GOLRadioButton(ssX+ssGap+ssWidth, ssY, ssWidth, ssHeight, "50ms", controller);
+        speedSelectors[2] =  new GOLRadioButton(ssX+2*ssGap+2*ssWidth, ssY, ssWidth, ssHeight, "75ms", controller);
+        speedSelectors[3] =  new GOLRadioButton(ssX+3*ssGap+3*ssWidth, ssY, ssWidth, ssHeight, "100ms", controller);
+        speedSelectors[4] =  new GOLRadioButton(ssX+4*ssGap+4*ssWidth, ssY, ssWidth, ssHeight, "200ms", controller);
+        speedSelectors[5] =  new GOLRadioButton(ssX+5*ssGap+5*ssWidth, ssY, ssWidth, ssHeight, "300ms", controller);
+        speedSelectors[6] =  new GOLRadioButton(ssX+6*ssGap+6*ssWidth, ssY, ssWidth, ssHeight, "400ms", controller);
+        speedSelectors[7] =  new GOLRadioButton(ssX+7*ssGap+7*ssWidth, ssY, ssWidth, ssHeight, "500ms", controller);
+        speedSelectors[8] =  new GOLRadioButton(ssX+8*ssGap+8*ssWidth, ssY, ssWidth, ssHeight, "1000ms", controller);
+        speedSelectors[9] =  new GOLRadioButton(ssX+9*ssGap+9*ssWidth, ssY, ssWidth, ssHeight, "2000ms", controller);
                 
         speedSelectorController.add(speedSelectors);
         speedSelectorController.setDefaultButton(speedSelectors[0]);
@@ -190,13 +217,14 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
         int rsGap = 40;
         int rsWidth = 300;
         int rsHeight = 70;
-        ruleSelectors[0] = new GOLRadioButton(rsX, rsY, rsWidth, rsHeight, "Conway");
-        ruleSelectors[1] = new GOLRadioButton(rsX+rsGap+rsWidth, rsY, rsWidth, rsHeight, "Wireworld");
-        ruleSelectors[2] = new GOLRadioButton(rsX+2*rsGap+2*rsWidth, rsY, rsWidth, rsHeight, "Viral");
-        ruleSelectors[3] = new GOLRadioButton(rsX+3*rsGap+3*rsWidth, rsY, rsWidth, rsHeight, "Conway Custom");
-        ruleSelectors[4] = new GOLRadioButton(rsX+4*rsGap+4*rsWidth, rsY, rsWidth, rsHeight, "Wireworld Custom");
-        ruleSelectors[5] = new GOLRadioButton(rsX+5*rsGap+5*rsWidth, rsY, rsWidth, rsHeight, "Viral Custom");
-        ruleSelectors[6] = new GOLRadioButton(rsX+6*rsGap+6*rsWidth, rsY, rsWidth, rsHeight, "Custom");
+        ruleSelectorController = new GOLRadioController(controller);
+        ruleSelectors[0] = new GOLRadioButton(rsX, rsY, rsWidth, rsHeight, "Conway", controller);
+        ruleSelectors[1] = new GOLRadioButton(rsX+rsGap+rsWidth, rsY, rsWidth, rsHeight, "Wireworld", controller);
+        ruleSelectors[2] = new GOLRadioButton(rsX+2*rsGap+2*rsWidth, rsY, rsWidth, rsHeight, "Viral", controller);
+        ruleSelectors[3] = new GOLRadioButton(rsX+3*rsGap+3*rsWidth, rsY, rsWidth, rsHeight, "Conway Custom", controller);
+        ruleSelectors[4] = new GOLRadioButton(rsX+4*rsGap+4*rsWidth, rsY, rsWidth, rsHeight, "Wireworld Custom", controller);
+        ruleSelectors[5] = new GOLRadioButton(rsX+5*rsGap+5*rsWidth, rsY, rsWidth, rsHeight, "Viral Custom", controller);
+        ruleSelectors[6] = new GOLRadioButton(rsX+6*rsGap+6*rsWidth, rsY, rsWidth, rsHeight, "Custom", controller);
         
         ruleSelectorController.add(ruleSelectors);
         ruleSelectorController.setDefaultButton(ruleSelectors[0]);
@@ -210,14 +238,29 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
         ruleSelectors[2].setColor(Color.YELLOW);
         ruleSelectors[0].toggleOn();
         
+        // NOT YET AVAILABLE!!!!!!!!
+            ruleSelectors[2].disable();
+            ruleSelectors[2].setVisible(false);
+            ruleSelectors[3].disable();
+            ruleSelectors[3].setVisible(false);
+            ruleSelectors[4].disable();
+            ruleSelectors[4].setVisible(false);
+            ruleSelectors[5].disable();
+            ruleSelectors[5].setVisible(false);
+            ruleSelectors[6].disable();
+            ruleSelectors[6].setVisible(false);
+        
         controller.add(resetButton);
         controller.add(runButton);
         controller.add(stepButton);
         controller.add(gridButton);
         controller.add(quitButton);
+        controller.add(speedSlider);
+        controller.add(speedMin);
+        controller.add(speedMax);
         
         controller.add(ruleSelectorController);
-        controller.add(speedSelectorController);
+        //controller.add(speedSelectorController);
         
     }
 
@@ -225,61 +268,53 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
     public void paint(Graphics g) 
     {        
         if(dbGraphics != null)
-        {
-            if(straightMode)
-            {
-                dbGraphics.drawLine((int)mouseX1, (int)mouseY1, (int)mouseX2, (int)mouseY2);
-                dbGraphics.drawLine((int)mouseX1+1, (int)mouseY1+1, (int)mouseX2+1, (int)mouseY2+1);
-                dbGraphics.drawLine((int)mouseX1-1, (int)mouseY1-1, (int)mouseX2-1, (int)mouseY2-1);
-                dbGraphics.drawLine((int)mouseX1+2, (int)mouseY1+2, (int)mouseX2+2, (int)mouseY2+2);
-                dbGraphics.drawLine((int)mouseX1-2, (int)mouseY1-2, (int)mouseX2-2, (int)mouseY2-2);
-            }
+        { 
+            super.paint(dbGraphics);
             
-            else
-            {
-                super.paint(dbGraphics);
+            controller.paint(dbGraphics);
 
-                for(int i = 1; i < GamesOfLife.getGridWidth()-2; ++i)
+            for(int i = 1; i < GamesOfLife.getGridWidth()-2; ++i)
+            {
+                for(int j = 1; j < GamesOfLife.getGridHeight()-1; ++j)
                 {
-                    for(int j = 1; j < GamesOfLife.getGridHeight()-1; ++j)
+                    if((i*cellW) > 95 && (j*cellH) > 95
+                            && (i*cellW) < getWidth() - 95 && (j*cellH) < getHeight() - 325)
                     {
-                        if((i*cellW) > 95 && (j*cellH) > 95
-                                && (i*cellW) < getWidth() - 95 && (j*cellH) < getHeight() - 325)
+                        dbGraphics.setColor(gridBackgroundColor);
+                        GamesOfLife.getCells()[i][j].paint(dbGraphics, (int)(i*cellW), (int)(j*cellH), (int)(cellW), (int)(cellH));
+                        dbGraphics.setColor(gridColor);
+                        if(gridButton.isToggled())
                         {
-                            dbGraphics.setColor(gridBackgroundColor);
-                            GamesOfLife.getCells()[i][j].paint(dbGraphics, (int)(i*cellW), (int)(j*cellH), (int)(cellW), (int)(cellH));
-                            dbGraphics.setColor(gridColor);
-                            if(gridButton.isToggled())
-                            {
-                                dbGraphics.drawRect((int)(i*cellW), (int)(j*cellH), (int)(cellW), (int)(cellH));
-                            }
-                            dbGraphics.setColor(Color.BLACK);
+                            dbGraphics.drawRect((int)(i*cellW), (int)(j*cellH), (int)(cellW), (int)(cellH));
                         }
+                        dbGraphics.setColor(Color.BLACK);
                     }
                 }
+            }
 
 
 //                dbGraphics.drawRect((int)(5*cellW), (int)(5*cellH), 
 //                        (int)((GamesOfLife.getGridWidth()-10)*cellW), 
 //                        (int)((GamesOfLife.getGridHeight()-20)*cellH));
 
-                //dbGraphics.drawRect(95, 95, getWidth() - 95-95, getHeight() - 325-95);
+            //dbGraphics.drawRect(95, 95, getWidth() - 95-95, getHeight() - 325-95);
 
-                dbGraphics.setFont(new Font("title font", Font.BOLD, 52));
-                String title = "Games Of Life: Cellular Atomata";
-                dbGraphics.drawString(title, 1600-dbGraphics.getFontMetrics().stringWidth(title)/2, 70);
+            dbGraphics.setFont(new Font("title font", Font.BOLD, 52));
+            String title = "Games Of Life: Cellular Atomata";
+            dbGraphics.drawString(title, 1600-dbGraphics.getFontMetrics().stringWidth(title)/2, 70);
 
-                Integer tickCount = GamesOfLife.tickCount;
-                int tickCountWidth = dbGraphics.getFontMetrics().stringWidth(tickCount.toString());
-                dbGraphics.drawString("T -  " + GamesOfLife.tickCount, (int)((3000)-tickCountWidth), 1550);
+            Integer tickCount = GamesOfLife.tickCount;
+            int tickCountWidth = dbGraphics.getFontMetrics().stringWidth(tickCount.toString());
+            dbGraphics.drawString("T -  " + GamesOfLife.tickCount, (int)((3000)-tickCountWidth), 1550);
 
-                dbGraphics.setFont(new Font("Normal", Font.PLAIN, 12));
+            dbGraphics.setFont(new Font("Normal", Font.PLAIN, 12));
 
-                controller.paint(dbGraphics);
-            }
             
-            g.drawImage(dbImage.getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT), 0, 0, this);
         }
+
+        if(dbImage != null)
+            g.drawImage(dbImage.getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT), 0, 0, this);
+        
     }
     
     private Cell getCellClicked(double mouseX, double mouseY) throws ArrayIndexOutOfBoundsException
@@ -291,7 +326,7 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
         
 //        try
 //        {
-            c = GamesOfLife.getCells()[(int)(mouseX * scaleFactorX/cellW)][(int)(mouseY * scaleFactorY/cellH)];
+            c = GamesOfLife.getCells()[(int)(mouseX * graphicScaleX/cellW)][(int)(mouseY * graphicScaleY/cellH)];
 //        }
 //        catch(Exception e)
 //        {
@@ -303,7 +338,7 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
     
      private void writeCells(Cell c)
     {        
-        if(mousePressEvent.getButton() == 1 && !GamesOfLife.rules.equals("wireworld"))
+        if(mousePressEvent.getButton() == 1 && GamesOfLife.rules.equals("conway"))
         {
                 c.setStatus(Cell.ALIVE);
         }
@@ -363,7 +398,7 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
             else if(slope == Double.NaN)
                 slope = 1000;
 
-            System.out.println(x0 + ", " + y0 + ", " + x1 + ", " + y1 + ": " + slope);
+            //System.out.println(x0 + ", " + y0 + ", " + x1 + ", " + y1 + ": " + slope);
 
             
             
@@ -401,7 +436,7 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
             else if(slope == Double.NaN)
                 slope = 1000;
 
-            System.out.println(x0 + ", " + y0 + ", " + x1 + ", " + y1 + ": " + slope);
+            //System.out.println(x0 + ", " + y0 + ", " + x1 + ", " + y1 + ": " + slope);
             
             double granularity = .001; // pixels
 
@@ -438,20 +473,29 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
     public void componentHidden(ComponentEvent ce) 
     {
     }
+    
+    private void quit()
+    {
+        quitWindow = new QuitWindow();
+        quitWindow.setAlwaysOnTop(true);
+        Thread quitWindowThread = new Thread(quitWindow);
+        quitWindowThread.start();
+
+        //System.out.println("PAUSE ACTIVATED");
+        paused = true;
+        resetButton.enable();
+
+        controller.disable();
+    }
 
     @Override
     public void mouseClicked(MouseEvent me) 
     {          
-        mouseClickEvent = me;
-        
-        mouseX2 = getMousePosition().getX();
-        mouseY2 = getMousePosition().getY();
-        
-        
-        if(mouseY2 > 1500);
-            //controller.mouseClicked(me);
-        
-        
+        if(!halted)
+        {
+            mouseX2 = getMousePosition().getX();
+            mouseY2 = getMousePosition().getY();
+        }
     }
 
     @Override
@@ -462,12 +506,6 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
         
         mouseX2 = getMousePosition().getX();
         mouseY2 = getMousePosition().getY();
-        
-        if(straightMode)
-        {
-            mouseX1 = getMousePosition().getX();
-            mouseY1 = getMousePosition().getY();
-        }
         
         Cell c = getCellClicked(mouseX2, mouseY2);
         
@@ -483,14 +521,6 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
     {
         //controller.mouseReleased(me);
         
-        if(straightMode)
-        {
-            mouseX2 = getMousePosition().getX();
-            mouseY2 = getMousePosition().getY();
-            
-            leavittLine(mouseX1, mouseY1, mouseX2, mouseY2);
-        }
-        
         Main.frontend.setPriority(Thread.MIN_PRIORITY);
         Main.backend.setPriority(Thread.MAX_PRIORITY);
         
@@ -503,13 +533,6 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
     @Override
     public void mouseExited(MouseEvent me) {}
     
-    Runnable LeavittLine = new Runnable() {
-        @Override
-        public void run() {
-            leavittLine(mouseX2, mouseY2, mouseX1, mouseY1);
-        }
-    };
-    
     @Override
     public void mouseDragged(MouseEvent me) {
         if(mousePressed)
@@ -517,7 +540,8 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
             mouseX1 = getMousePosition().getX();
             mouseY1 = getMousePosition().getY();
             
-            leavittLine(mouseX2, mouseY2, mouseX1, mouseY1);
+            if(mouseY1 < 1600 && mouseY2 < 1600)
+                leavittLine(mouseX2, mouseY2, mouseX1, mouseY1);
             
             //EventQueue.invokeLater(LeavittLine);
             
@@ -537,14 +561,6 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        //System.out.println(straightMode);
-        
-        if(straightMode)
-        {
-            mouseX2 = getMousePosition().getX();
-            mouseY2 = getMousePosition().getY();
-            
-        }
         repaint();
     }
 
@@ -556,19 +572,15 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
     {
         if(e.getKeyCode() == 27) // Escape Key
         {
-            Main.halt("Escape key exited the program");
+            quit();
+            repaint();
+            return;
         }
         
         if(e.getKeyCode() == 32) // Space Bar
         {
-            System.out.println("PAUSE ACTIVATED");
             paused = !paused;
             resetButton.toggleDisable();
-        }
-        
-        if(e.getKeyCode() == 16) // Shift Key
-        {
-            straightMode = true;
         }
         
         
@@ -577,20 +589,6 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
     @Override
     public void keyReleased(KeyEvent e) 
     {
-        if(e.getKeyCode() == 16) // Shift Key
-        {
-            straightMode = false;
-        }
-    }
-
-    public void halt(String cause)
-    {
-        System.out.println("Frontend halted for reason: " + cause);
-        halted = true;
-        
-        controller.halt();
-        
-        this.dispose();
     }
 
     @Override
@@ -606,13 +604,12 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
         }
         else if(e.getSource().equals(quitButton))
         {
-            Main.halt("Quit button was pressed");
+            quit();
             repaint();
             return;
         }
         else if(e.getSource().equals(runButton))
         {
-            System.out.println("PAUSE ACTIVATED");
             paused = !paused;
             resetButton.toggleDisable();
             repaint();
@@ -625,36 +622,64 @@ public class Application extends JFrame implements Runnable, ComponentListener, 
             return;
         }
         
-        for(int i = 0; i < speedSelectors.length; ++i)
+        else if(e.getSource().equals(speedSlider))
         {
-            if(speedSelectors[i].isToggled() && e.getSource().equals(speedSelectors[i]))
-            {
-                switch(i)
-                {
-                    case 0 : GamesOfLife.tickInterval = 25;
-                            break;
-                    case 1 : GamesOfLife.tickInterval = 50;
-                            break;
-                    case 2 : GamesOfLife.tickInterval = 75;
-                            break;
-                    case 3 : GamesOfLife.tickInterval = 100;
-                            break;
-                    case 4 : GamesOfLife.tickInterval = 200;
-                            break;
-                    case 5 : GamesOfLife.tickInterval = 300;
-                            break;
-                    case 6 : GamesOfLife.tickInterval = 400;
-                            break;
-                    case 7 : GamesOfLife.tickInterval = 500;
-                            break;
-                    case 8 : GamesOfLife.tickInterval = 1000;
-                            break;
-                    case 9 : GamesOfLife.tickInterval = 2000;                            
-                }
-                repaint();
-                return;
-            }
+            GamesOfLife.tickInterval = (int)speedSlider.getValue();
+            repaint();
+            return;
         }
+        
+        else if(e.getSource().equals(speedMax))
+        {
+            speedSlider.setMaxValue((float)speedMax.getDouble());
+            
+            speedSlider.refresh();
+            
+            repaint();
+            return;
+        }
+        
+        else if(e.getSource().equals(speedMin))
+        {
+            speedSlider.setMinValue((float)speedMin.getDouble());
+                        
+            speedSlider.refresh();
+            
+            repaint();
+            return;
+        }
+        
+//        for(int i = 0; i < speedSelectors.length; ++i)
+//        {
+//            if(speedSelectors[i].isToggled() && e.getSource().equals(speedSelectors[i]))
+//            {
+//                switch(i)
+//                {
+//                    case 0 : GamesOfLife.tickInterval = 25;
+//                            break;
+//                    case 1 : GamesOfLife.tickInterval = 50;
+//                            break;
+//                    case 2 : GamesOfLife.tickInterval = 75;
+//                            break;
+//                    case 3 : GamesOfLife.tickInterval = 100;
+//                            break;
+//                    case 4 : GamesOfLife.tickInterval = 200;
+//                            break;
+//                    case 5 : GamesOfLife.tickInterval = 300;
+//                            break;
+//                    case 6 : GamesOfLife.tickInterval = 400;
+//                            break;
+//                    case 7 : GamesOfLife.tickInterval = 500;
+//                            break;
+//                    case 8 : GamesOfLife.tickInterval = 1000;
+//                            break;
+//                    case 9 : GamesOfLife.tickInterval = 2000;                            
+//                }
+//                repaint();
+//                return;
+//            }
+                repaint();
+//        }
         
         for(int i = 0; i < ruleSelectors.length; ++i)
         {

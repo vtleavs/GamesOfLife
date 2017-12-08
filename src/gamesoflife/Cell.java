@@ -124,7 +124,6 @@ public class Cell
     
     public void viral()
     {
-        
     }
     
     public void wireworld()

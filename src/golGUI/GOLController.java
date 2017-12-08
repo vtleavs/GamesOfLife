@@ -10,6 +10,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -21,7 +23,7 @@ import java.util.logging.Logger;
  *
  * @author Benji
  */
-public class GOLController implements Runnable, MouseListener, MouseMotionListener
+public class GOLController implements Runnable, KeyListener, MouseListener, MouseMotionListener
 {
     ArrayList<GOLElement> elements = new ArrayList<>();
     
@@ -30,15 +32,19 @@ public class GOLController implements Runnable, MouseListener, MouseMotionListen
     
     private boolean halted;
     
-    static Application uiHandler;
+    private boolean disabled;
     
-    public GOLController(Application handler, double scaleX, double scaleY) 
+    GOLApp uiHandler;
+    
+    public GOLController(GOLApp handler, double scaleX, double scaleY) 
     {
         this.uiHandler = handler;
         graphicScaleFactorX = scaleX;
         graphicScaleFactorY = scaleY;
         
         handler.addMouseListener(this);
+        handler.addMouseMotionListener(this);
+        handler.addKeyListener(this);
     }
     
     public void paint(Graphics g)
@@ -64,6 +70,9 @@ public class GOLController implements Runnable, MouseListener, MouseMotionListen
     }
     
     public void mouseClicked(MouseEvent me) {
+        if(disabled)
+            return;
+        
         ActionEvent event = null;
         for(GOLElement e : elements)
         {
@@ -73,13 +82,16 @@ public class GOLController implements Runnable, MouseListener, MouseMotionListen
                 if(event != null)
                 {
                     uiHandler.actionPerformed(event);
-                    return;
+                    
                 }
             }
         }
     }
 
     public void mousePressed(MouseEvent me) {
+        if(disabled)
+            return;
+        
         ActionEvent event = null;
         for(GOLElement e : elements)
         {
@@ -89,42 +101,66 @@ public class GOLController implements Runnable, MouseListener, MouseMotionListen
                 if(event != null)
                 {
                     uiHandler.actionPerformed(event);
-                    return;
+                    
                 }
             }
         }
     }
 
     public void mouseReleased(MouseEvent me) {
+        if(disabled)
+            return;
+        
         ActionEvent event = null;
         for(GOLElement e : elements)
         {
-            if(e.isDisabled())
+            if(!e.isDisabled())
             {
                 event = e.mouseReleased(me);
                 if(event != null)
                 {
                     uiHandler.actionPerformed(event);
-                    return;
+                    
                 }
             }
         }
     }
     
-    static Point getMousePosition()
+    @Override
+    public void mouseDragged(MouseEvent me) {
+        if(disabled)
+            return;
+        
+        ActionEvent event = null;
+        for(GOLElement e : elements)
+        {
+            if(!e.isDisabled())
+            {
+                event = e.mouseDragged(me);
+                if(event != null)
+                {
+                    uiHandler.actionPerformed(event);
+                    
+                }
+            }
+        }
+    }
+    
+    public Point getMousePosition()
     {
         return uiHandler.getMousePosition();
     }
     
     public void halt()
     {
+        disabled = true;
         halted = true;
     }
 
     @Override
     public void run() {
         while(!halted)
-        {
+        {            
             try {
                 Thread.sleep(1);
             } catch (InterruptedException ex) {
@@ -140,19 +176,67 @@ public class GOLController implements Runnable, MouseListener, MouseMotionListen
     public void mouseExited(MouseEvent e) {}
 
     @Override
-    public void mouseDragged(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public void mouseMoved(MouseEvent me) 
     {
+        if(disabled)
+            return;
+        
         for(GOLElement e : elements)
         {
-            if(e.isDisabled())
+            if(!e.isDisabled())
             {
-                e.hover();
+                e.mouseMoved(me);
             }
         }
     }
+
+    @Override
+    public void keyTyped(KeyEvent ke) {
+        if(disabled)
+            return;
+        
+        for(GOLElement e : elements)
+        {
+            if(!e.isDisabled())
+            {
+                e.keyTyped(ke);
+            }
+        }
+    }
+
+    @Override
+    public void keyPressed(KeyEvent ke) {
+        if(disabled)
+            return;
+        
+        for(GOLElement e : elements)
+        {
+            if(!e.isDisabled())
+            {
+                e.keyPressed(ke);
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
+
+    public boolean isHalted() {
+        return halted;
+    }
+    
+    public void unHalt()
+    {
+        halted = false;
+    }
+
+    public void disable() {
+        this.disabled = true;
+    }
+    
+    public void enable() {
+        this.disabled = false;
+    }
+    
+    
 }

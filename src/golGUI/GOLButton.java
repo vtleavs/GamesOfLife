@@ -34,9 +34,9 @@ public class GOLButton extends GOLElement
      * @param title The title of the button which will be displayed
      * on the button itself
      */
-    public GOLButton(String title) 
+    public GOLButton(String title, GOLController controller) 
     {
-        this(0, 0, 200, 100, title, "GOLButton" + numButtons);
+        this(0, 0, 200, 100, title, "GOLButton" + numButtons, controller);
     }
     
     /**
@@ -46,9 +46,9 @@ public class GOLButton extends GOLElement
      * @param name The identifier that you wish the button to be known by,
      * not really necessary, but it makes for more understandable output
      */
-    public GOLButton(String title, String name) 
+    public GOLButton(String title, String name, GOLController controller) 
     {
-        this(0, 0, 200, 100, title, name);
+        this(0, 0, 200, 100, title, name, controller);
     }
     
     /**
@@ -58,9 +58,9 @@ public class GOLButton extends GOLElement
      * @param title The title of the button which will be displayed
      * on the button itself
      */
-    public GOLButton(int x, int y, String title) 
+    public GOLButton(int x, int y, String title, GOLController controller) 
     {
-        this(x, y, 200, 100, title, "GOLButton" + numButtons);
+        this(x, y, 200, 100, title, "GOLButton" + numButtons, controller);
     }
     
     /**
@@ -72,9 +72,9 @@ public class GOLButton extends GOLElement
      * @param name The identifier that you wish the button to be known by,
      * not really necessary, but it makes for more understandable output
      */
-    public GOLButton(int x, int y, String title, String name) 
+    public GOLButton(int x, int y, String title, String name, GOLController controller) 
     {
-        this(x, y, 200, 100, title, name);
+        this(x, y, 200, 100, title, name, controller);
     }
     
     /**
@@ -86,9 +86,9 @@ public class GOLButton extends GOLElement
      * @param title The title of the button which will be displayed
      * on the button itself
      */
-    public GOLButton(int x, int y, int width, int height, String title) 
+    public GOLButton(int x, int y, int width, int height, String title, GOLController controller) 
     {
-        this(x, y, width, height, title, "GOLButton" + numButtons);
+        this(x, y, width, height, title, "GOLButton" + numButtons, controller);
     }
     
     /**
@@ -102,15 +102,9 @@ public class GOLButton extends GOLElement
      * @param title The title of the button which will be displayed
      * on the button itself
      */
-    public GOLButton(int x, int y, int width, int height, String title, String name) 
+    public GOLButton(int x, int y, int width, int height, String title, String name, GOLController controller) 
     {
-        this.xLocation = x;
-        this.yLocation = y;
-        this.location = new Point(x, y);
-        
-        this.width = width;
-        this.height = height;
-        this.size = new Dimension(width, height);
+        super(x, y, width, height, controller);
         
         numButtons++;
         
@@ -125,9 +119,9 @@ public class GOLButton extends GOLElement
                     Math.max(color.getGreen()-50, 0), 
                     Math.max(color.getBlue()-50, 0)));
         else if(disabled)
-            g.setColor(new Color(Math.max(color.getRed()-100, 0), 
-                    Math.max(color.getGreen()-100, 0), 
-                    Math.max(color.getBlue()-100, 0)));
+            g.setColor(new Color(Math.max(color.getRed()-60, 0), 
+                    Math.max(color.getGreen()-60, 0), 
+                    Math.max(color.getBlue()-60, 0)));
         else
             g.setColor(color);
         
@@ -198,7 +192,7 @@ public class GOLButton extends GOLElement
     public ActionEvent mouseClicked(MouseEvent e) { 
         if(e.getButton() == 1 && isCaptured() && !disabled)
         {
-            toggled = !toggled;
+            //toggled = !toggled;
             return new ActionEvent(this, 195819, name);
         }
         return null;
@@ -207,6 +201,7 @@ public class GOLButton extends GOLElement
     public ActionEvent mousePressed(MouseEvent e) { 
         if(e.getButton() == 1 && isCaptured() && !disabled)
         {
+            toggled = !toggled;
             pressed = true;
         }
         return null;

@@ -9,7 +9,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import javax.tools.DocumentationTool;
 
 /**
  *
@@ -34,10 +36,22 @@ public class GOLElement
     
     private double gScaleX = 1;
     private double gScaleY = 1;
+    
+    protected GOLController controller;
 
-    public GOLElement() 
+    public GOLElement(int x, int y, int width, int height, GOLController controller) 
     {
+        xLocation = x;
+        yLocation = y;
+        location = new Point(x, y);
+        
+        this.width = width;
+        this.height = height;
+        size = new Dimension(width, height);
+        
         numElements++;
+        
+        this.controller = controller;
     }
     
     protected boolean isCaptured() {
@@ -47,7 +61,7 @@ public class GOLElement
         double w = gScaleX*width;
         double h = gScaleY*height;
         
-        Point mousePos = GOLController.getMousePosition();
+        Point mousePos = controller.getMousePosition();
         try
         {
 //            return mousePos.getX() < xLocation+width
@@ -87,7 +101,7 @@ public class GOLElement
         this.visible = visible;
     }
 
-    public void toggleDisabled() {
+    public void toggleDisable() {
         disabled = !disabled;
     }
     
@@ -136,6 +150,8 @@ public class GOLElement
     }
     
     public void paint(Graphics g) {
+        if(!visible)
+            return;
     }
     
     public ActionEvent mouseClicked(MouseEvent e) { 
@@ -149,6 +165,22 @@ public class GOLElement
     public ActionEvent mouseReleased(MouseEvent e) { 
         return null;
     }
+    
+    public ActionEvent mouseDragged(MouseEvent e){
+        return null;
+    }
+    
+    public ActionEvent mouseMoved(MouseEvent e) {
+        return null;
+    }
+    
+    public ActionEvent keyTyped(KeyEvent ke) {
+        return null;
+    }
+    
+    public ActionEvent keyPressed(KeyEvent ke){
+        return null;
+    }
 
     public void setScale(double graphicScaleFactorX, double graphicScaleFactorY) 
     {
@@ -160,4 +192,11 @@ public class GOLElement
     {
         
     }
+
+    @Override
+    public String toString() {
+        return super.toString(); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 }
