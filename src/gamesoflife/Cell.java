@@ -20,6 +20,12 @@ public class Cell
     public static final char CONDUCTOR = 2;
     public static final char ELECTRON_HEAD = 3;
     public static final char ELECTRON_TAIL = 4;
+    public static final char V1 = 5;
+    public static final char V2 = 6;
+    public static final char V3 = 7;
+    public static final char V4 = 8;
+    public static final char V5 = 9;
+    public static final char V6 = 10;
     
     /**
      * 0 - Dead
@@ -95,6 +101,18 @@ public class Cell
             return Color.BLUE;
         if(status == ELECTRON_TAIL)
             return Color.GREEN;
+        if(status == V1)
+            return Color.BLUE;
+        if(status == V2)
+            return Color.GREEN;
+        if(status == V3)
+            return Color.RED;
+        if(status == V4)
+            return Color.ORANGE;
+        if(status == V5)
+            return Color.YELLOW;
+        if(status == V6)
+            return Color.CYAN;
         return Color.LIGHT_GRAY;
     }
     
@@ -123,7 +141,81 @@ public class Cell
     }
     
     public void viral()
-    {
+    {        
+        if(this.status == DEAD)
+        {
+            if(countNeighborStatus(V1) > 2 && countNeighborStatus(V1) > countNeighborStatus(V2))
+                tempStatus = V1;
+            else if(countNeighborStatus(V2) > 2 && countNeighborStatus(V2) > countNeighborStatus(V1))
+                tempStatus = V2;
+        }
+        
+        if(this.status == V1)
+        {
+            if(countNeighborStatus(V1) <= 2)
+                tempStatus = DEAD;
+            else if(countNeighborStatus(V1) >= 6)
+                tempStatus = DEAD;
+            
+            if(countNeighborStatus(V2) > countNeighborStatus(V1))
+                tempStatus = DEAD;
+        }  
+    
+        if(this.status == V2)
+        {
+            if(countNeighborStatus(V2) <= 2)
+                tempStatus = DEAD;
+            else if(countNeighborStatus(V2) >= 5)
+                tempStatus = DEAD;
+            
+            if(countNeighborStatus(V1) > countNeighborStatus(V2))
+                tempStatus = DEAD;
+        }  
+        
+        
+//        
+//        if(this.status == V1)
+//        {
+//            if(countNeighborStatus(V1) < 2)
+//                tempStatus = DEAD;
+//            else if(countNeighborStatus(V1) == 2 
+//                    || countNeighborStatus(V1) == 3)
+//                tempStatus = V1;
+//            else if(countNeighborStatus(V1) > 5)
+//                tempStatus = DEAD;
+//            
+//            if(countNeighborStatus(V2) > countNeighborStatus(V1)+1)
+//                tempStatus = DEAD;
+//            
+////            if(countNeighborStatus(V2) > 0)
+////            {
+////                
+////            }
+//        }
+//        
+//        
+//        else if(this.status == V2)
+//        {
+//            if(countNeighborStatus(V2) < 2)
+//                tempStatus = DEAD;
+//            else if(countNeighborStatus(V2) == 2 
+//                || countNeighborStatus(V2) == 3)
+//                tempStatus = V2;
+//            else if(countNeighborStatus(V2) > 5)
+//                tempStatus = DEAD;
+//            
+//            if(countNeighborStatus(V1) > countNeighborStatus(V2)+1)
+//                tempStatus = DEAD;
+//        }
+//        
+//        else if(this.status == DEAD)
+//        {
+//            if(countNeighborStatus(V1) >= 3 && countNeighborStatus(V2) < 4)
+//                tempStatus = V1;
+//            else if(countNeighborStatus(V2) >= 3 && countNeighborStatus(V1) < 4)
+//                tempStatus = V2;
+//        }
+        
     }
     
     public void wireworld()

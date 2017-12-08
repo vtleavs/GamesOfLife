@@ -23,9 +23,10 @@ public class QuitWindow extends GOLApp
     GOLButton proceedButton;
     GOLButton cancelButton;
     
+    
     public QuitWindow() 
     {
-        setLocation(1300, 500);
+        setLocation((int)(Application.screenSize.getWidth()/2-300), (int)(Application.screenSize.getHeight()/2-200));
         setSize(600, 400);
         setUndecorated(true);
         setVisible(true);

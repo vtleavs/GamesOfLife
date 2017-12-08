@@ -12,9 +12,11 @@ import golGUI.GOLRadioController;
 import golGUI.GOLSlider;
 import golGUI.GOLTextInput;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -75,6 +77,8 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
     public static Color backgroundColor;
     public static Color gridColor;
     public static Color gridBackgroundColor;
+    
+    public static Dimension screenSize;
         
     public static boolean paused = true;
     
@@ -87,12 +91,14 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
         
         buildUI();
         
-        setSize(3200, 1800);
-        //setSize(screenSize.width, screenSize.height);
+        screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        
+        //setSize(3200, 1800);
+        setSize(screenSize.width, screenSize.height);
         
         this.setUndecorated(true);
         this.setVisible(true);
-        dbImage = createImage(3200, 1800);
+        dbImage = createImage(screenSize.width, screenSize.height);
         dbGraphics = dbImage.getGraphics();
         
         graphicScaleX = 1;//this.getSize().getWidth()/3200;
@@ -120,6 +126,12 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
     {
         gridBackgroundColor = new Color(31, 129, 5);
         gridColor = Color.white;
+    }
+    
+    private void viralMode()
+    {
+        gridBackgroundColor = new Color(200, 200, 255);
+        gridColor = Color.gray;
     }
     
     @Override
@@ -239,8 +251,6 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
         ruleSelectors[0].toggleOn();
         
         // NOT YET AVAILABLE!!!!!!!!
-            ruleSelectors[2].disable();
-            ruleSelectors[2].setVisible(false);
             ruleSelectors[3].disable();
             ruleSelectors[3].setVisible(false);
             ruleSelectors[4].disable();
@@ -338,28 +348,45 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
     
      private void writeCells(Cell c)
     {        
-        if(mousePressEvent.getButton() == 1 && GamesOfLife.rules.equals("conway"))
+        if(mousePressEvent.getButton() == 1)
         {
-                c.setStatus(Cell.ALIVE);
-        }
-        
-        else if(mousePressEvent.getButton() == 1 && GamesOfLife.rules.equals("wireworld"))
-        {
-                c.setStatus(Cell.CONDUCTOR);
+            if(GamesOfLife.rules.equals("conway"))
+            {
+                    c.setStatus(Cell.ALIVE);
+            }
+
+            else if( GamesOfLife.rules.equals("wireworld"))
+            {
+                    c.setStatus(Cell.CONDUCTOR);
+            }
+
+            else if(GamesOfLife.rules.equals("viral"))
+            {
+                    c.setStatus(Cell.V1);
+            }
         }
 
         else if(mousePressEvent.getButton() == 3)
         {
                 c.setStatus(Cell.DEAD);
         }
-
-        else if(mousePressEvent.getButton() == 2 && GamesOfLife.rules.equals("wireworld"))
+        
+        else if(mousePressEvent.getButton() == 2)
         {
-            if(c.getStatus() == Cell.ELECTRON_HEAD)
-                c.setStatus(Cell.CONDUCTOR);
-            else if(c.getStatus() == Cell.CONDUCTOR)
-                c.setStatus(Cell.ELECTRON_HEAD);
+            if(GamesOfLife.rules.equals("wireworld"))
+            {
+                if(c.getStatus() == Cell.ELECTRON_HEAD)
+                    c.setStatus(Cell.CONDUCTOR);
+                else if(c.getStatus() == Cell.CONDUCTOR)
+                    c.setStatus(Cell.ELECTRON_HEAD);
+            }
+            else if(GamesOfLife.rules.equals("viral"))
+            {
+                c.setStatus(Cell.V2);
+            }
         }
+
+        
 
         else if(mousePressEvent.getButton() == 5 && GamesOfLife.rules.equals("wireworld"))
         {
@@ -649,38 +676,6 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
             return;
         }
         
-//        for(int i = 0; i < speedSelectors.length; ++i)
-//        {
-//            if(speedSelectors[i].isToggled() && e.getSource().equals(speedSelectors[i]))
-//            {
-//                switch(i)
-//                {
-//                    case 0 : GamesOfLife.tickInterval = 25;
-//                            break;
-//                    case 1 : GamesOfLife.tickInterval = 50;
-//                            break;
-//                    case 2 : GamesOfLife.tickInterval = 75;
-//                            break;
-//                    case 3 : GamesOfLife.tickInterval = 100;
-//                            break;
-//                    case 4 : GamesOfLife.tickInterval = 200;
-//                            break;
-//                    case 5 : GamesOfLife.tickInterval = 300;
-//                            break;
-//                    case 6 : GamesOfLife.tickInterval = 400;
-//                            break;
-//                    case 7 : GamesOfLife.tickInterval = 500;
-//                            break;
-//                    case 8 : GamesOfLife.tickInterval = 1000;
-//                            break;
-//                    case 9 : GamesOfLife.tickInterval = 2000;                            
-//                }
-//                repaint();
-//                return;
-//            }
-                repaint();
-//        }
-        
         for(int i = 0; i < ruleSelectors.length; ++i)
         {
             if(ruleSelectors[i].isToggled() && e.getSource().equals(ruleSelectors[i]))
@@ -695,6 +690,7 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
                             wireworldMode();
                             break;
                     case 2 : GamesOfLife.rules = "viral";
+                            viralMode();
                             break;
                     case 3 : GamesOfLife.rules = "custom conway";
                             break;
