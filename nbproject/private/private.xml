@@ -4,19 +4,16 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/golGUI/GOLElement.java</file>
-            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/gamesoflife/Cell.java</file>
-            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/gamesoflife/Application.java</file>
-            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/golGUI/GOLApp.java</file>
-            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/gamesoflife/QuitWindow.java</file>
-            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/golGUI/GOLDialog.java</file>
-            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/gamesoflife/Main.java</file>
-            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/golGUI/GOLTextInput.java</file>
             <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/golGUI/GOLRadioButton.java</file>
-            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/golGUI/GOLSlider.java</file>
+            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/gamesoflife/Cell.java</file>
             <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/golGUI/GOLController.java</file>
             <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/gamesoflife/GamesOfLife.java</file>
             <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/golGUI/GOLButton.java</file>
+            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/gamesoflife/Application.java</file>
+            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/golGUI/GOLApp.java</file>
             <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/golGUI/GOLRadioController.java</file>
+            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/gamesoflife/QuitWindow.java</file>
+            <file>file:/C:/Users/Benji/OneDrive/Documents/Programming/NetBeansProjects/GamesOfLife/src/gamesoflife/Main.java</file>
         </group>
     </open-files>
 </project-private>
