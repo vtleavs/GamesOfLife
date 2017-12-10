@@ -79,6 +79,9 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
     public static Color gridBackgroundColor;
     
     public static Dimension screenSize;
+    public static double scaleX;
+    public static double scaleY;
+            
         
     public static boolean paused = true;
     
@@ -86,15 +89,25 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
     {
         super();
         
+        
+        screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        //setSize(1920, 1080);
+        setSize(screenSize.width, screenSize.height);
+        
+        double scaleX = (double)this.getSize().width/3200;
+        double scaleY = (double)this.getSize().height/1800;
+        
+        System.out.println(Toolkit.getDefaultToolkit().getScreenSize().width);
+                
+        setGraphicScale(scaleX, scaleY);
+        
         System.out.print("Initializing Frontend: ");
         long initStart = System.currentTimeMillis();
         
         buildUI();
         
-        screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         
-        //setSize(3200, 1800);
-        setSize(screenSize.width, screenSize.height);
+        
         
         this.setUndecorated(true);
         this.setVisible(true);
@@ -125,7 +138,7 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
     private void wireworldMode()
     {
         gridBackgroundColor = new Color(31, 129, 5);
-        gridColor = Color.white;
+        gridColor = Color.black;
     }
     
     private void viralMode()
@@ -503,6 +516,9 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
     
     private void quit()
     {
+        if(quitWindow != null && !quitWindow.isHalted())
+            return;
+        controller.disable();
         quitWindow = new QuitWindow();
         quitWindow.setAlwaysOnTop(true);
         Thread quitWindowThread = new Thread(quitWindow);

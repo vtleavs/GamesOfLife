@@ -60,7 +60,10 @@ public class GOLController implements Runnable, KeyListener, MouseListener, Mous
     
     public void add(GOLElement element)
     {
-        element.setScale(graphicScaleFactorX, graphicScaleFactorY);
+        element.setSize(new Dimension((int)(graphicScaleFactorX * element.width), 
+                (int)(graphicScaleFactorY * element.height)));
+        element.setLocation(new Point((int)(graphicScaleFactorX * element.xLocation), 
+                (int)(graphicScaleFactorY * element.yLocation)));
         elements.add(element);
     }
     

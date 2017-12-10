@@ -86,4 +86,11 @@ public abstract class GOLApp extends JFrame implements KeyListener, MouseListene
     {
         controller = new GOLController(this, graphicScaleX, graphicScaleY);
     }
+
+    public void setGraphicScale(double graphicScaleX, double graphicScaleY) {
+        this.graphicScaleX = graphicScaleX;
+        this.graphicScaleY = graphicScaleY;
+    }
+    
+    
 }

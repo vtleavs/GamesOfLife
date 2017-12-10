@@ -34,8 +34,8 @@ public class GOLElement
     protected boolean visible = true;
     protected boolean disabled;
     
-    private double gScaleX = 1;
-    private double gScaleY = 1;
+    //private double gScaleX = 1;
+    //private double gScaleY = 1;
     
     protected GOLController controller;
 
@@ -56,10 +56,10 @@ public class GOLElement
     
     protected boolean isCaptured() {
         
-        double xL = gScaleX*xLocation;
-        double yL = gScaleY*yLocation;
-        double w = gScaleX*width;
-        double h = gScaleY*height;
+        double xL = xLocation;
+        double yL = yLocation;
+        double w = width;
+        double h = height;
         
         Point mousePos = controller.getMousePosition();
         try
@@ -180,12 +180,6 @@ public class GOLElement
     
     public ActionEvent keyPressed(KeyEvent ke){
         return null;
-    }
-
-    public void setScale(double graphicScaleFactorX, double graphicScaleFactorY) 
-    {
-        gScaleX = graphicScaleFactorX;
-        gScaleY = graphicScaleFactorY;
     }
     
     public void hover()
