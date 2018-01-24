@@ -97,8 +97,8 @@ public class Application extends SApplication implements Runnable, ComponentList
         //setSize(3200, 1800);
         setSize(screenSize.width, screenSize.height);
         
-        scaleX = 3200/(double)super.getSize().getWidth();
-        scaleY = 1800/(double)super.getSize().getHeight();
+        //scaleX = 3200/(double)super.getSize().getWidth();
+        //scaleY = 1800/(double)super.getSize().getHeight();
                 
         System.out.print("Initializing Frontend: ");
                 
@@ -334,7 +334,7 @@ public class Application extends SApplication implements Runnable, ComponentList
 
         if(dbImage != null)
         {
-            g.drawImage(dbImage.getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT), 0, 0, this);
+            g.drawImage(dbImage.getScaledInstance(screenSize.width, screenSize.height, Image.SCALE_DEFAULT), 0, 0, this);
         }
         
     }
