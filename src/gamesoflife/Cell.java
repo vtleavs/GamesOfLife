@@ -64,10 +64,10 @@ public class Cell
         this.y = y;
     }
     
-    public void paint(Graphics g, int xl, int yl, int w, int h)
+    public void paint(Graphics g, int x, int y, int w, int h)
     {
         g.setColor(deterimineColor());
-        g.fillRect(xl, yl, w, h);
+        g.fillRect(x, y, w, h);
         g.setColor(Color.BLACK);
     }
     

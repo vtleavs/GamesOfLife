@@ -5,8 +5,8 @@
  */
 package gamesoflife;
 
-import golGUI.GOLApp;
-import golGUI.GOLButton;
+import simple.gui.SApplication;
+import simple.gui.SButton;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -18,10 +18,10 @@ import java.awt.event.MouseEvent;
  *
  * @author Benji
  */
-public class QuitWindow extends GOLApp
+public class QuitWindow extends SApplication
 {
-    GOLButton proceedButton;
-    GOLButton cancelButton;
+    SButton proceedButton;
+    SButton cancelButton;
     
     
     public QuitWindow() 
@@ -39,8 +39,8 @@ public class QuitWindow extends GOLApp
     protected void buildUI() {
         super.buildUI();
         
-        proceedButton = new GOLButton(350, 250, "I'm sure", controller);
-        cancelButton = new GOLButton(50, 250, "Cancel", controller);
+        proceedButton = new SButton(350, 250, "I'm sure", controller);
+        cancelButton = new SButton(50, 250, "Cancel", controller);
         
         controller.add(proceedButton);
         controller.add(cancelButton);

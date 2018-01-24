@@ -27,8 +27,8 @@ public class GamesOfLife implements Runnable
      * "custom"
      */
     public static String rules;
-    private static int gridWidth = 160;
-    private static int gridHeight = 90;
+    private static int gridWidth = 320; //160
+    private static int gridHeight = 180; //90
     
     public static int tickCount = 0;
         

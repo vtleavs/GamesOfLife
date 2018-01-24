@@ -5,17 +5,20 @@
  */
 package gamesoflife;
 
-import golGUI.GOLApp;
-import golGUI.GOLButton;
-import golGUI.GOLRadioButton;
-import golGUI.GOLRadioController;
-import golGUI.GOLSlider;
-import golGUI.GOLTextInput;
+import simple.gui.SApplication;
+import simple.gui.SButton;
+import simple.gui.SRadioButton;
+import simple.gui.SRadioController;
+import simple.gui.SSlider;
+import simple.gui.STextInput;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.HeadlessException;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,13 +31,12 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//import javax.swing.*;
 
 /**
  *
  * @author Ben
  */
-public class Application extends GOLApp implements Runnable, ComponentListener, MouseListener, MouseMotionListener, KeyListener, ActionListener
+public class Application extends SApplication implements Runnable, ComponentListener, MouseListener, MouseMotionListener, KeyListener, ActionListener
 {
     private Image dbImage;
     private Graphics dbGraphics;
@@ -55,32 +57,32 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
     MouseEvent mousePressEvent;
     MouseEvent mouseClickEvent;
     
-    GOLButton resetButton;
-    GOLButton quitButton;
-    GOLButton runButton;
-    GOLButton stepButton;
-    GOLRadioButton gridButton;
+    SButton resetButton;
+    SButton quitButton;
+    SButton runButton;
+    SButton stepButton;
+    SRadioButton gridButton;
     
-    GOLRadioController speedSelectorController;
-    GOLRadioButton[] speedSelectors = new GOLRadioButton[10];
-    GOLRadioController ruleSelectorController;
-    GOLRadioButton[] ruleSelectors = new GOLRadioButton[7];
+    SRadioController speedSelectorController;
+    SRadioButton[] speedSelectors = new SRadioButton[10];
+    SRadioController ruleSelectorController;
+    SRadioButton[] ruleSelectors = new SRadioButton[7];
     
-    GOLSlider speedSlider;
+    SSlider speedSlider;
     
-    GOLTextInput speedMax;
-    GOLTextInput speedMin;
-    GOLTextInput speedStep;
+    STextInput speedMax;
+    STextInput speedMin;
+    STextInput speedStep;
     
     QuitWindow quitWindow = null;
     
-    public static Color backgroundColor;
+    public static Color backgroundColor = new Color(250, 250, 250);
     public static Color gridColor;
     public static Color gridBackgroundColor;
     
     public static Dimension screenSize;
-    public static double scaleX;
-    public static double scaleY;
+    public static double scaleX = 1;
+    public static double scaleY = 1;
             
         
     public static boolean paused = true;
@@ -89,44 +91,38 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
     {
         super();
         
-        
         screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        //setSize(1920, 1080);
+        //super.setSize(1920, 1080);
+        //super.setSize(1500, 1500);
+        //setSize(3200, 1800);
         setSize(screenSize.width, screenSize.height);
         
-        double scaleX = (double)this.getSize().width/3200;
-        double scaleY = (double)this.getSize().height/1800;
-        
-        System.out.println(Toolkit.getDefaultToolkit().getScreenSize().width);
+        scaleX = 3200/(double)super.getSize().getWidth();
+        scaleY = 1800/(double)super.getSize().getHeight();
                 
-        setGraphicScale(scaleX, scaleY);
-        
         System.out.print("Initializing Frontend: ");
+                
+        super.setScale(scaleX, scaleY);
+        
         long initStart = System.currentTimeMillis();
         
         buildUI();
         
-        
-        
-        
-        this.setUndecorated(true);
-        this.setVisible(true);
-        dbImage = createImage(screenSize.width, screenSize.height);
+        super.setUndecorated(true);
+        super.setVisible(true);
+        dbImage = super.createImage(screenSize.width, screenSize.height);
         dbGraphics = dbImage.getGraphics();
         
-        graphicScaleX = 1;//this.getSize().getWidth()/3200;
-        graphicScaleY = 1;//this.getSize().getHeight()/1800;
-        
-        cellW = (double)dbImage.getWidth(this)/(double)GamesOfLife.getGridWidth();
-        cellH = (double)dbImage.getHeight(this)/(double)GamesOfLife.getGridHeight();
+        cellW = 3200/GamesOfLife.getGridWidth();
+        cellH = 1800/GamesOfLife.getGridHeight();
                 
         halted = false;
         
         System.out.println(System.currentTimeMillis() - initStart + "ms");
         
-        conwayMode();     
+        conwayMode();
         
-        repaint();
+        super.repaint();
     }
     
     private void conwayMode()
@@ -193,27 +189,27 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
     protected void buildUI()
     {
         super.buildUI();        
-        resetButton = new GOLButton(100, 1650, 200, 100, "Reset", controller);
+        resetButton = new SButton(100, 1650, 200, 100, "Reset", controller);
         resetButton.setColor(new Color(100, 100, 255));
-        runButton = new GOLButton(500, 1650, 300, 100, "Run / Pause", controller);
+        runButton = new SButton(500, 1650, 300, 100, "Run / Pause", controller);
         runButton.setColor(Color.green);
-        stepButton = new GOLButton(900, 1650, 100, 100, "Step", controller);
+        stepButton = new SButton(900, 1650, 100, 100, "Step", controller);
         stepButton.setColor(Color.lightGray);
-        gridButton = new GOLRadioButton(1100, 1650, 200, 100, "Toggle Grid", controller);
+        gridButton = new SRadioButton(1100, 1650, 200, 100, "Toggle Grid", controller);
         gridButton.toggleOn();
-        quitButton = new GOLButton(3000, 1650, 100, 100, "Quit", controller);
+        quitButton = new SButton(3000, 1650, 100, 100, "Quit", controller);
         quitButton.setColor(new Color(225, 100, 100));
         
-        speedSlider = new GOLSlider(1575, 1675, 700, 50, 50, 1000, (float) 50, controller);
+        speedSlider = new SSlider(1575, 1675, 700, 50, 50, 1000, (float) 50, controller);
         speedSlider.setValue(100);
         speedSlider.setLabelPrefix("Step: ");
         speedSlider.setLabelSuffex("ms");
         
-        speedMin = new GOLTextInput(1425, 1675, 100, 50, controller);
+        speedMin = new STextInput(1425, 1675, 100, 50, controller);
         speedMin.setValue("" + speedSlider.getMinValue());
         speedMin.setFont(new Font("", Font.BOLD, 30));
         
-        speedMax = new GOLTextInput(2325, 1675, 100, 50, controller);
+        speedMax = new STextInput(2325, 1675, 100, 50, controller);
         speedMax.setValue("" + speedSlider.getMaxValue());
         speedMax.setFont(new Font("", Font.BOLD, 30));
         
@@ -222,17 +218,17 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
         int ssGap = 20;
         int ssWidth = 125;
         int ssHeight = 50;
-        speedSelectorController = new GOLRadioController(controller);
-        speedSelectors[0] =  new GOLRadioButton(ssX, ssY, ssWidth, ssHeight, "25ms", controller);
-        speedSelectors[1] =  new GOLRadioButton(ssX+ssGap+ssWidth, ssY, ssWidth, ssHeight, "50ms", controller);
-        speedSelectors[2] =  new GOLRadioButton(ssX+2*ssGap+2*ssWidth, ssY, ssWidth, ssHeight, "75ms", controller);
-        speedSelectors[3] =  new GOLRadioButton(ssX+3*ssGap+3*ssWidth, ssY, ssWidth, ssHeight, "100ms", controller);
-        speedSelectors[4] =  new GOLRadioButton(ssX+4*ssGap+4*ssWidth, ssY, ssWidth, ssHeight, "200ms", controller);
-        speedSelectors[5] =  new GOLRadioButton(ssX+5*ssGap+5*ssWidth, ssY, ssWidth, ssHeight, "300ms", controller);
-        speedSelectors[6] =  new GOLRadioButton(ssX+6*ssGap+6*ssWidth, ssY, ssWidth, ssHeight, "400ms", controller);
-        speedSelectors[7] =  new GOLRadioButton(ssX+7*ssGap+7*ssWidth, ssY, ssWidth, ssHeight, "500ms", controller);
-        speedSelectors[8] =  new GOLRadioButton(ssX+8*ssGap+8*ssWidth, ssY, ssWidth, ssHeight, "1000ms", controller);
-        speedSelectors[9] =  new GOLRadioButton(ssX+9*ssGap+9*ssWidth, ssY, ssWidth, ssHeight, "2000ms", controller);
+        speedSelectorController = new SRadioController(controller);
+        speedSelectors[0] =  new SRadioButton(ssX, ssY, ssWidth, ssHeight, "25ms", controller);
+        speedSelectors[1] =  new SRadioButton(ssX+ssGap+ssWidth, ssY, ssWidth, ssHeight, "50ms", controller);
+        speedSelectors[2] =  new SRadioButton(ssX+2*ssGap+2*ssWidth, ssY, ssWidth, ssHeight, "75ms", controller);
+        speedSelectors[3] =  new SRadioButton(ssX+3*ssGap+3*ssWidth, ssY, ssWidth, ssHeight, "100ms", controller);
+        speedSelectors[4] =  new SRadioButton(ssX+4*ssGap+4*ssWidth, ssY, ssWidth, ssHeight, "200ms", controller);
+        speedSelectors[5] =  new SRadioButton(ssX+5*ssGap+5*ssWidth, ssY, ssWidth, ssHeight, "300ms", controller);
+        speedSelectors[6] =  new SRadioButton(ssX+6*ssGap+6*ssWidth, ssY, ssWidth, ssHeight, "400ms", controller);
+        speedSelectors[7] =  new SRadioButton(ssX+7*ssGap+7*ssWidth, ssY, ssWidth, ssHeight, "500ms", controller);
+        speedSelectors[8] =  new SRadioButton(ssX+8*ssGap+8*ssWidth, ssY, ssWidth, ssHeight, "1000ms", controller);
+        speedSelectors[9] =  new SRadioButton(ssX+9*ssGap+9*ssWidth, ssY, ssWidth, ssHeight, "2000ms", controller);
                 
         speedSelectorController.add(speedSelectors);
         speedSelectorController.setDefaultButton(speedSelectors[0]);
@@ -242,19 +238,19 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
         int rsGap = 40;
         int rsWidth = 300;
         int rsHeight = 70;
-        ruleSelectorController = new GOLRadioController(controller);
-        ruleSelectors[0] = new GOLRadioButton(rsX, rsY, rsWidth, rsHeight, "Conway", controller);
-        ruleSelectors[1] = new GOLRadioButton(rsX+rsGap+rsWidth, rsY, rsWidth, rsHeight, "Wireworld", controller);
-        ruleSelectors[2] = new GOLRadioButton(rsX+2*rsGap+2*rsWidth, rsY, rsWidth, rsHeight, "Viral", controller);
-        ruleSelectors[3] = new GOLRadioButton(rsX+3*rsGap+3*rsWidth, rsY, rsWidth, rsHeight, "Conway Custom", controller);
-        ruleSelectors[4] = new GOLRadioButton(rsX+4*rsGap+4*rsWidth, rsY, rsWidth, rsHeight, "Wireworld Custom", controller);
-        ruleSelectors[5] = new GOLRadioButton(rsX+5*rsGap+5*rsWidth, rsY, rsWidth, rsHeight, "Viral Custom", controller);
-        ruleSelectors[6] = new GOLRadioButton(rsX+6*rsGap+6*rsWidth, rsY, rsWidth, rsHeight, "Custom", controller);
+        ruleSelectorController = new SRadioController(controller);
+        ruleSelectors[0] = new SRadioButton(rsX, rsY, rsWidth, rsHeight, "Conway", controller);
+        ruleSelectors[1] = new SRadioButton(rsX+rsGap+rsWidth, rsY, rsWidth, rsHeight, "Wireworld", controller);
+        ruleSelectors[2] = new SRadioButton(rsX+2*rsGap+2*rsWidth, rsY, rsWidth, rsHeight, "Viral", controller);
+        ruleSelectors[3] = new SRadioButton(rsX+3*rsGap+3*rsWidth, rsY, rsWidth, rsHeight, "Conway Custom", controller);
+        ruleSelectors[4] = new SRadioButton(rsX+4*rsGap+4*rsWidth, rsY, rsWidth, rsHeight, "Wireworld Custom", controller);
+        ruleSelectors[5] = new SRadioButton(rsX+5*rsGap+5*rsWidth, rsY, rsWidth, rsHeight, "Viral Custom", controller);
+        ruleSelectors[6] = new SRadioButton(rsX+6*rsGap+6*rsWidth, rsY, rsWidth, rsHeight, "Custom", controller);
         
         ruleSelectorController.add(ruleSelectors);
         ruleSelectorController.setDefaultButton(ruleSelectors[0]);
         
-        for(GOLRadioButton rb : ruleSelectors)
+        for(SRadioButton rb : ruleSelectors)
         {
             rb.setColor(new Color(250, 250, 250));
         }
@@ -289,10 +285,15 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
 
     @Override
     public void paint(Graphics g) 
-    {        
+    {     
         if(dbGraphics != null)
         { 
             super.paint(dbGraphics);
+            
+            dbGraphics.setColor(backgroundColor);
+            dbGraphics.fillRect(0, 0, 3200, 1800);
+           // g.setColor(Color.BLACK);
+            
             
             controller.paint(dbGraphics);
 
@@ -300,8 +301,10 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
             {
                 for(int j = 1; j < GamesOfLife.getGridHeight()-1; ++j)
                 {
-                    if((i*cellW) > 95 && (j*cellH) > 95
-                            && (i*cellW) < getWidth() - 95 && (j*cellH) < getHeight() - 325)
+                    if((i*cellW) > 95 
+                        && (j*cellH) > 95
+                        && (i*cellW) < 3200 - 95
+                        && (j*cellH) < 1800 - 325)
                     {
                         dbGraphics.setColor(gridBackgroundColor);
                         GamesOfLife.getCells()[i][j].paint(dbGraphics, (int)(i*cellW), (int)(j*cellH), (int)(cellW), (int)(cellH));
@@ -315,28 +318,24 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
                 }
             }
 
-
-//                dbGraphics.drawRect((int)(5*cellW), (int)(5*cellH), 
-//                        (int)((GamesOfLife.getGridWidth()-10)*cellW), 
-//                        (int)((GamesOfLife.getGridHeight()-20)*cellH));
-
-            //dbGraphics.drawRect(95, 95, getWidth() - 95-95, getHeight() - 325-95);
-
             dbGraphics.setFont(new Font("title font", Font.BOLD, 52));
             String title = "Games Of Life: Cellular Atomata";
             dbGraphics.drawString(title, 1600-dbGraphics.getFontMetrics().stringWidth(title)/2, 70);
 
+            
+            
             Integer tickCount = GamesOfLife.tickCount;
             int tickCountWidth = dbGraphics.getFontMetrics().stringWidth(tickCount.toString());
             dbGraphics.drawString("T -  " + GamesOfLife.tickCount, (int)((3000)-tickCountWidth), 1550);
 
             dbGraphics.setFont(new Font("Normal", Font.PLAIN, 12));
 
-            
         }
 
         if(dbImage != null)
+        {
             g.drawImage(dbImage.getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT), 0, 0, this);
+        }
         
     }
     
@@ -345,16 +344,9 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
         Cell c = null;
         
         if(mouseY < 0 || mouseY > GamesOfLife.getGridWidth()*cellH)
-            throw new ArrayIndexOutOfBoundsException("Index out of bounds n stuff");
+            throw new ArrayIndexOutOfBoundsException("Index out of bounds");
         
-//        try
-//        {
-            c = GamesOfLife.getCells()[(int)(mouseX * graphicScaleX/cellW)][(int)(mouseY * graphicScaleY/cellH)];
-//        }
-//        catch(Exception e)
-//        {
-//            throw e;
-//        }
+        c = GamesOfLife.getCells()[(int)(mouseX/ cellW)][(int)(mouseY / cellH)];
         
         return c;
     }
@@ -521,8 +513,7 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
         controller.disable();
         quitWindow = new QuitWindow();
         quitWindow.setAlwaysOnTop(true);
-        Thread quitWindowThread = new Thread(quitWindow);
-        quitWindowThread.start();
+        quitWindow.start();
 
         //System.out.println("PAUSE ACTIVATED");
         paused = true;
@@ -539,6 +530,11 @@ public class Application extends GOLApp implements Runnable, ComponentListener, 
             mouseX2 = getMousePosition().getX();
             mouseY2 = getMousePosition().getY();
         }
+    }
+
+    @Override
+    public Point getMousePosition() throws HeadlessException {
+        return super.getMousePosition(); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
